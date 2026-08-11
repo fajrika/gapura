@@ -301,6 +301,7 @@ async function main() {
     { key: "kecamatan", value: "Kecamatan Contoh" },
     { key: "kota", value: "Surabaya" },
     { key: "alamat_kantor", value: "Balai RT 01, Jl. Melati No. 1" },
+    { key: "nama_ketua", value: "Budi Santoso" },
   ]);
 
   console.log("Seeding selesai.");
