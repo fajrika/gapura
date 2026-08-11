@@ -103,7 +103,12 @@ export async function GET(
     doc.end();
   });
 
-  return new Response(new Blob([buffer], { type: "application/pdf" }), {
+  const pdfBody = buffer.buffer.slice(
+    buffer.byteOffset,
+    buffer.byteOffset + buffer.byteLength,
+  ) as ArrayBuffer;
+
+  return new Response(pdfBody, {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename="surat-${surat.noSurat ?? surat.id}.pdf"`,

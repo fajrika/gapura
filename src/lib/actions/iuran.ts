@@ -1,9 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import {
   iuran,
@@ -12,7 +11,6 @@ import {
   wargas,
 } from "@/db/schema";
 import { requireAuth, isPengurusRole } from "@/lib/auth";
-import { currentPeriode } from "@/lib/utils";
 
 export type IuranActionState = {
   error?: string;

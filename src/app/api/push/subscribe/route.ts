@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { pushSubscriptions } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
   }
 
   const existing = await db.query.pushSubscriptions.findFirst({
-    where: (s, { eq }) => eq(s.endpoint, parsed.data.endpoint),
+    where: eq(pushSubscriptions.endpoint, parsed.data.endpoint),
   });
 
   if (!existing) {
@@ -50,7 +51,7 @@ export async function DELETE(request: Request) {
   if (body?.endpoint) {
     await db
       .delete(pushSubscriptions)
-      .where((s, { eq }) => eq(s.endpoint, body.endpoint));
+      .where(eq(pushSubscriptions.endpoint, body.endpoint));
   }
 
   return NextResponse.json({ ok: true });

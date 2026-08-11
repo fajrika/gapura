@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { and, eq, gte, lt, sql } from "drizzle-orm";
+import { and, gte, lt } from "drizzle-orm";
 import { db } from "@/db";
 import { transaksis, wargas } from "@/db/schema";
 import { requireAuth, isPengurusRole } from "@/lib/auth";

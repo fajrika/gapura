@@ -7,15 +7,18 @@ import { Button } from "@/components/ui/button";
 const PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_KEY ?? "";
 
 export function PushSubscribe() {
-  const [supported, setSupported] = useState(true);
+  const [supported] = useState(
+    () =>
+      typeof navigator !== "undefined" &&
+      "serviceWorker" in navigator &&
+      "PushManager" in window &&
+      !!PUBLIC_KEY,
+  );
   const [enabled, setEnabled] = useState(false);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !PUBLIC_KEY) {
-      setSupported(false);
-      return;
-    }
+    if (!supported) return;
     (async () => {
       try {
         const reg = await navigator.serviceWorker.getRegistration();
@@ -23,10 +26,10 @@ export function PushSubscribe() {
         const sub = await reg.pushManager.getSubscription();
         setEnabled(!!sub);
       } catch {
-        setSupported(false);
+        /* ignore */
       }
     })();
-  }, []);
+  }, [supported]);
 
   const toggle = () =>
     startTransition(async () => {

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { suratPengajuans, settings, users } from "@/db/schema";
+import { suratPengajuans, settings } from "@/db/schema";
 import { requireAuth, isPengurusRole } from "@/lib/auth";
 
 const ajukanSchema = z.object({

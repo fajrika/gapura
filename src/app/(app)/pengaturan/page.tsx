@@ -1,15 +1,13 @@
 import { db } from "@/db";
 import { settings } from "@/db/schema";
-import { requireAuth, isPengurusRole } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PushSubscribe } from "@/components/pwa/push-subscribe";
 
 export const dynamic = "force-dynamic";
 
 export default async function PengaturanPage() {
-  const { dbUser } = await requireAuth();
-  const isManager = isPengurusRole(dbUser.role);
-
+  await requireAuth();
   const rows = await db.select().from(settings);
 
   return (

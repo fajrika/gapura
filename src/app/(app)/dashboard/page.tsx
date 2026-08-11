@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { and, desc, eq, gte, lt, sql, isNull } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   agendas,
@@ -10,7 +10,6 @@ import {
   tagihan,
   transaksis,
   wargas,
-  keluhans,
 } from "@/db/schema";
 import { getSession, isPengurusRole } from "@/lib/auth";
 import { currentPeriode, formatDate, formatPeriode, formatRupiah } from "@/lib/utils";

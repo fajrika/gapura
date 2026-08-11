@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { ilike, or, eq, desc } from "drizzle-orm";
+import { ilike, or, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { wargas } from "@/db/schema";
 import { requireAuth, isPengurusRole } from "@/lib/auth";

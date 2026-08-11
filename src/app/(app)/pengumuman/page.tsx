@@ -7,7 +7,7 @@ import { Card, CardContent, Badge } from "@/components/ui/card";
 import { PengumumanForm } from "@/components/pengumuman-form";
 import { createPengumumanAction, togglePinAction, deletePengumumanAction } from "@/lib/actions/pengumuman";
 import { PinButton, DeleteGenericButton } from "@/components/action-buttons";
-import { Pin, Megaphone } from "lucide-react";
+import { Megaphone } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 

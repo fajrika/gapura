@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { wargas } from "@/db/schema";

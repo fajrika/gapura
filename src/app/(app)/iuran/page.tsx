@@ -1,15 +1,13 @@
 import Link from "next/link";
-import { and, eq, desc, sql } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { iuran, tagihan, wargas } from "@/db/schema";
 import { requireAuth, isPengurusRole } from "@/lib/auth";
-import { currentPeriode, formatPeriode, formatRupiah, formatDate } from "@/lib/utils";
+import { currentPeriode, formatPeriode, formatRupiah } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, Badge } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input, Label } from "@/components/ui/input";
 import { BayarButton, BatalBayarButton } from "@/components/bayar-button";
 import { GenerateTagihan, IuranForm, ToggleIuran } from "@/components/iuran-controls";
-import { Wallet, FilePlus2 } from "lucide-react";
+import { Wallet } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +16,7 @@ export default async function IuranPage({
 }: {
   searchParams: Promise<{ periode?: string }>;
 }) {
-  const { dbUser, user } = await requireAuth();
+  const { dbUser } = await requireAuth();
   const isManager = isPengurusRole(dbUser.role);
   const { periode } = await searchParams;
   const selPeriode = periode && /^\d{4}-\d{2}$/.test(periode) ? periode : currentPeriode();

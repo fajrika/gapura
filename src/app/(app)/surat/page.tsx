@@ -1,8 +1,8 @@
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { db } from "@/db";
 import { suratPengajuans, wargas } from "@/db/schema";
 import { requireAuth, isPengurusRole } from "@/lib/auth";
-import { formatDateTime, formatDate } from "@/lib/utils";
+import { formatDateTime } from "@/lib/utils";
 import { Card, CardContent, Badge } from "@/components/ui/card";
 import { AjukanSuratForm } from "@/components/surat-form";
 import { ajukanSuratAction, deleteSuratAction } from "@/lib/actions/surat";
