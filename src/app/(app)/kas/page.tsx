@@ -86,27 +86,27 @@ export default async function KasPage({
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Card>
-          <CardContent>
+          <CardContent className="min-w-0">
             <p className="text-xs text-slate-500">Saldo</p>
-            <p className="text-lg font-bold text-slate-900">{formatRupiah(saldo)}</p>
+            <p className="break-words text-lg font-bold tabular-nums text-slate-900">{formatRupiah(saldo)}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent>
+          <CardContent className="min-w-0">
             <p className="flex items-center gap-1 text-xs text-slate-500">
-              <ArrowUpCircle className="size-3.5 text-emerald-600" /> Pemasukan
+              <ArrowUpCircle className="size-3.5 shrink-0 text-emerald-600" /> Pemasukan
             </p>
-            <p className="text-lg font-bold text-emerald-600">{formatRupiah(masuk[0]?.total ?? 0)}</p>
+            <p className="break-words text-lg font-bold tabular-nums text-emerald-600">{formatRupiah(masuk[0]?.total ?? 0)}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent>
+          <CardContent className="min-w-0">
             <p className="flex items-center gap-1 text-xs text-slate-500">
-              <ArrowDownCircle className="size-3.5 text-red-600" /> Pengeluaran
+              <ArrowDownCircle className="size-3.5 shrink-0 text-red-600" /> Pengeluaran
             </p>
-            <p className="text-lg font-bold text-red-600">{formatRupiah(keluar[0]?.total ?? 0)}</p>
+            <p className="break-words text-lg font-bold tabular-nums text-red-600">{formatRupiah(keluar[0]?.total ?? 0)}</p>
           </CardContent>
         </Card>
       </div>
