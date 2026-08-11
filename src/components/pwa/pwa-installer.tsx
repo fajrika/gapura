@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Bell } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Bell, RefreshCw } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -11,8 +11,12 @@ interface BeforeInstallPromptEvent extends Event {
 export function PwaInstaller() {
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const reloadingRef = useRef(false);
 
   useEffect(() => {
+    let registration: ServiceWorkerRegistration | undefined;
+
     const onPrompt = (e: Event) => {
       e.preventDefault();
       setInstallEvent(e as BeforeInstallPromptEvent);
@@ -21,33 +25,89 @@ export function PwaInstaller() {
       setInstalled(true);
       setInstallEvent(null);
     };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        registration?.update().catch(() => {});
+      }
+    };
+    const onControllerChange = () => {
+      if (reloadingRef.current) window.location.reload();
+    };
+
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
+    document.addEventListener("visibilitychange", onVisibility);
+    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
+
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((reg) => {
+          registration = reg;
+          reg.update().catch(() => {});
+
+          reg.addEventListener("updatefound", () => {
+            const sw = reg.installing;
+            if (!sw) return;
+            sw.addEventListener("statechange", () => {
+              if (sw.state === "installed" && navigator.serviceWorker.controller) {
+                setUpdateAvailable(true);
+              }
+            });
+          });
+        })
+        .catch(() => {});
     }
+
     return () => {
       window.removeEventListener("beforeinstallprompt", onPrompt);
       window.removeEventListener("appinstalled", onInstalled);
+      document.removeEventListener("visibilitychange", onVisibility);
+      navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
     };
   }, []);
 
-  if (installed || !installEvent) return null;
+  const applyUpdate = () => {
+    reloadingRef.current = true;
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (reg?.waiting) {
+        reg.waiting.postMessage({ type: "SKIP_WAITING" });
+      } else {
+        window.location.reload();
+      }
+    });
+  };
 
   return (
-    <div className="fixed inset-x-0 bottom-20 z-50 mx-auto flex max-w-sm items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-white px-4 py-3 shadow-lg md:bottom-4 md:left-72">
-      <div className="flex items-center gap-2">
-        <Bell className="size-5 text-emerald-600" />
-        <p className="text-sm text-slate-700">
-          Pasang aplikasi di layar utama untuk akses lebih cepat.
-        </p>
-      </div>
-      <button
-        onClick={() => installEvent.prompt()}
-        className="shrink-0 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white"
-      >
-        Pasang
-      </button>
-    </div>
+    <>
+      {updateAvailable && (
+        <div className="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-3 bg-emerald-600 px-4 py-2.5 text-white">
+          <p className="text-sm font-medium">Versi baru tersedia.</p>
+          <button
+            onClick={applyUpdate}
+            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700"
+          >
+            <RefreshCw className="size-3.5" /> Muat Ulang
+          </button>
+        </div>
+      )}
+
+      {!installed && installEvent && (
+        <div className="fixed inset-x-0 bottom-20 z-50 mx-auto flex max-w-sm items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-white px-4 py-3 shadow-lg md:bottom-4 md:left-72">
+          <div className="flex items-center gap-2">
+            <Bell className="size-5 text-emerald-600" />
+            <p className="text-sm text-slate-700">
+              Pasang aplikasi di layar utama untuk akses lebih cepat.
+            </p>
+          </div>
+          <button
+            onClick={() => installEvent.prompt()}
+            className="shrink-0 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white"
+          >
+            Pasang
+          </button>
+        </div>
+      )}
+    </>
   );
 }
