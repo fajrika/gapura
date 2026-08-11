@@ -8,6 +8,9 @@ import {
   Wallet,
   Landmark,
   LayoutGrid,
+  MapPin,
+  Siren,
+  Cctv,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -70,6 +73,10 @@ export function SideNav({ userName, userRole }: { userName: string; userRole: st
         { href: "/keluhan", label: "Keluhan", icon: LayoutGrid },
         { href: "/kegiatan", label: "Kegiatan", icon: LayoutGrid },
         { href: "/arisan", label: "Arisan", icon: LayoutGrid },
+        { href: "/rumah", label: "Rumah", icon: Home },
+        { href: "/siteplan", label: "Siteplan", icon: MapPin },
+        { href: "/security", label: "Security", icon: Siren },
+        { href: "/cctv", label: "CCTV", icon: Cctv },
         { href: "/pengaturan", label: "Pengaturan", icon: LayoutGrid },
       ],
     },

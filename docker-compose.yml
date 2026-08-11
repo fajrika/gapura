@@ -55,5 +55,16 @@ services:
       migrate:
         condition: service_completed_successfully
 
+  go2rtc:
+    image: alexxit/go2rtc:latest
+    container_name: gapura-go2rtc
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - TZ=Asia/Jakarta
+    volumes:
+      - go2rtc-data:/config
+
 volumes:
   pgdata:
+  go2rtc-data:

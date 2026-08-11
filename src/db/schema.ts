@@ -13,7 +13,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const roleEnum = pgEnum("role", ["admin", "pengurus", "warga"]);
+export const roleEnum = pgEnum("role", ["admin", "pengurus", "warga", "security"]);
 export const jkEnum = pgEnum("jk", ["L", "P"]);
 export const statusTinggalEnum = pgEnum("status_tinggal", [
   "tetap",
@@ -47,6 +47,27 @@ export const statusKeluhanEnum = pgEnum("status_keluhan", [
   "diproses",
   "selesai",
 ]);
+export const statusPanggilanEnum = pgEnum("status_panggilan", [
+  "dipanggil",
+  "selesai",
+]);
+
+export const rumahs = pgTable(
+  "rumahs",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    nomor: varchar("nomor", { length: 20 }).notNull().unique(),
+    blok: varchar("blok", { length: 20 }),
+    alamat: text("alamat"),
+    posX: numeric("pos_x", { precision: 6, scale: 2 }).notNull().default("0"),
+    posY: numeric("pos_y", { precision: 6, scale: 2 }).notNull().default("0"),
+    vaNumber: varchar("va_number", { length: 40 }).unique(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("rumahs_nomor_idx").on(t.nomor)],
+);
 
 export const wargas = pgTable(
   "wargas",
@@ -61,6 +82,9 @@ export const wargas = pgTable(
     pekerjaan: varchar("pekerjaan", { length: 100 }),
     statusTinggal: statusTinggalEnum("status_tinggal").notNull().default("tetap"),
     noRumah: varchar("no_rumah", { length: 20 }),
+    rumahId: integer("rumah_id").references(() => rumahs.id, {
+      onDelete: "set null",
+    }),
     telepon: varchar("telepon", { length: 20 }),
     isKepalaKeluarga: boolean("is_kepala_keluarga").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -323,10 +347,51 @@ export const settings = pgTable("settings", {
   value: text("value"),
 });
 
+export const securityCalls = pgTable(
+  "security_calls",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    callerUserId: integer("caller_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    callerWargaId: integer("caller_warga_id").references(() => wargas.id, {
+      onDelete: "set null",
+    }),
+    status: statusPanggilanEnum("status").notNull().default("dipanggil"),
+    respondedByUserId: integer("responded_by_user_id").references(
+      () => users.id,
+      { onDelete: "set null" },
+    ),
+    selesaiAt: timestamp("selesai_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("security_calls_status_idx").on(t.status)],
+);
+
+export const cameras = pgTable("cameras", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  nama: varchar("nama", { length: 255 }).notNull(),
+  lokasi: varchar("lokasi", { length: 255 }),
+  rtspUrl: text("rtsp_url").notNull(),
+  onvifHost: varchar("onvif_host", { length: 255 }),
+  onvifPort: integer("onvif_port").notNull().default(8000),
+  onvifUsername: varchar("onvif_username", { length: 100 }),
+  onvifPassword: varchar("onvif_password", { length: 255 }),
+  enabled: boolean("enabled").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Warga = typeof wargas.$inferSelect;
 export type NewWarga = typeof wargas.$inferInsert;
+export type Rumah = typeof rumahs.$inferSelect;
+export type Camera = typeof cameras.$inferSelect;
+export type SecurityCall = typeof securityCalls.$inferSelect;
 export type Tagihan = typeof tagihan.$inferSelect;
 export type Transaksi = typeof transaksis.$inferSelect;
 export type Pengumuman = typeof pengumumans.$inferSelect;

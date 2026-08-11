@@ -21,7 +21,7 @@ export async function verifyPassword(password: string, hash: string) {
 
 export interface SessionPayload {
   sub: string;
-  role: "admin" | "pengurus" | "warga";
+  role: "admin" | "pengurus" | "warga" | "security";
   name: string;
 }
 

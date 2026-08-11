@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { sql } from "drizzle-orm";
+import { sql, eq, inArray } from "drizzle-orm";
 import { db } from "./index";
 import {
   users,
@@ -18,8 +18,10 @@ import {
   arisanAnggota,
   settings,
   laporanKejadiians,
+  rumahs,
 } from "./schema";
 import { hashPassword } from "@/lib/auth";
+import { generateVaForRumah } from "@/lib/payments";
 
 async function main() {
   console.log("Seeding...");
@@ -28,12 +30,13 @@ async function main() {
     new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
 
   await db.execute(
-    sql`TRUNCATE TABLE users, wargas, iuran, tagihan, transaksis, pengumumans, agendas, surat_pengajuans, jadwal_rundas, laporan_kejadiians, keluhans, kegiatans, kehadirans, arisans, arisan_anggota, arisan_pencairan, push_subscriptions, settings RESTART IDENTITY CASCADE`,
+    sql`TRUNCATE TABLE users, wargas, iuran, tagihan, transaksis, pengumumans, agendas, surat_pengajuans, jadwal_rundas, laporan_kejadiians, keluhans, kegiatans, kehadirans, arisans, arisan_anggota, arisan_pencairan, push_subscriptions, settings, rumahs, security_calls, cameras RESTART IDENTITY CASCADE`,
   );
 
   const adminPassword = await hashPassword("admin123");
   const pengurusPassword = await hashPassword("pengurus123");
   const wargaPassword = await hashPassword("warga123");
+  const securityPassword = await hashPassword("security123");
 
   await db.insert(users).values([
     {
@@ -49,6 +52,13 @@ async function main() {
       passwordHash: pengurusPassword,
       role: "pengurus",
       phone: "081234567891",
+    },
+    {
+      name: "Satpam RT",
+      email: "security@gapura.local",
+      passwordHash: securityPassword,
+      role: "security",
+      phone: "081234567899",
     },
   ]);
 
@@ -134,6 +144,61 @@ async function main() {
   ];
 
   await db.insert(wargas).values(wargaData);
+
+  const rumahData = [
+    { nomor: "01", blok: "A", posX: 18, posY: 20 },
+    { nomor: "02", blok: "A", posX: 46, posY: 20 },
+    { nomor: "03", blok: "A", posX: 74, posY: 20 },
+    { nomor: "04", blok: "B", posX: 18, posY: 48 },
+    { nomor: "05", blok: "B", posX: 46, posY: 48 },
+  ];
+  const wargaRows = await db
+    .select()
+    .from(wargas)
+    .where(inArray(wargas.nik, wargaData.map((w) => w.nik)));
+  const wargaByNorumah = new Map(wargaRows.map((w) => [w.noRumah, w.id]));
+
+  for (const r of rumahData) {
+    const kepalaId = wargaByNorumah.get(r.nomor);
+    const kepala = kepalaId
+      ? wargaRows.find((w) => w.id === kepalaId)
+      : undefined;
+    const inserted = await db
+      .insert(rumahs)
+      .values({
+        nomor: r.nomor,
+        blok: r.blok,
+        posX: String(r.posX),
+        posY: String(r.posY),
+      })
+      .returning();
+    const vaNumber = await generateVaForRumah({
+      rumahId: inserted[0].id,
+      rumahNomor: r.nomor,
+      namaKepalaKeluarga: kepala?.nama ?? "-",
+    });
+    await db
+      .update(rumahs)
+      .set({ vaNumber })
+      .where(eq(rumahs.id, inserted[0].id));
+  }
+
+  // Hubungkan warga ke rumah sesuai no_rumah
+  for (const r of rumahData) {
+    const rumahRow = await db.query.rumahs.findFirst({
+      where: eq(rumahs.nomor, r.nomor),
+    });
+    if (!rumahRow) continue;
+    const anggotaIds = wargaRows
+      .filter((w) => w.noRumah === r.nomor)
+      .map((w) => w.id);
+    if (anggotaIds.length > 0) {
+      await db
+        .update(wargas)
+        .set({ rumahId: rumahRow.id })
+        .where(inArray(wargas.id, anggotaIds));
+    }
+  }
 
   const admin = (await db.query.users.findFirst({
     where: (u, { eq }) => eq(u.email, "admin@gapura.local"),
@@ -305,7 +370,7 @@ async function main() {
   ]);
 
   console.log("Seeding selesai.");
-  console.log("Login: admin@gapura.local / admin123 | pengurus@gapura.local / pengurus123 | warga@gapura.local / warga123");
+  console.log("Login: admin@gapura.local / admin123 | pengurus@gapura.local / pengurus123 | warga@gapura.local / warga123 | security@gapura.local / security123");
 }
 
 main()

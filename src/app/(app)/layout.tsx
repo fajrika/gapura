@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { MobileNav, SideNav } from "@/components/app-shell";
+import { SecurityAlert } from "@/components/security-alert";
 
 export default async function AppLayout({
   children,
@@ -17,6 +18,7 @@ export default async function AppLayout({
         <div className="mx-auto max-w-5xl px-4 py-6">{children}</div>
       </main>
       <MobileNav />
+      <SecurityAlert />
     </div>
   );
 }

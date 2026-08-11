@@ -10,6 +10,10 @@ import {
   PiggyBank,
   Settings,
   User,
+  Home,
+  MapPin,
+  Siren,
+  Cctv,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
@@ -23,6 +27,10 @@ const items = [
   { href: "/keluhan", label: "Keluhan", icon: MessageSquareWarning, desc: "Lapor masalah warga" },
   { href: "/kegiatan", label: "Kegiatan", icon: PartyPopper, desc: "Acara & daftar hadir" },
   { href: "/arisan", label: "Arisan", icon: PiggyBank, desc: "Arisan warga" },
+  { href: "/rumah", label: "Rumah", icon: Home, desc: "Data rumah & VA pembayaran" },
+  { href: "/siteplan", label: "Siteplan", icon: MapPin, desc: "Peta rumah RT" },
+  { href: "/security", label: "Security", icon: Siren, desc: "Panggilan & status keamanan" },
+  { href: "/cctv", label: "CCTV", icon: Cctv, desc: "Pantau kamera keamanan" },
 ];
 
 export const dynamic = "force-dynamic";

@@ -1,4 +1,4 @@
-const CACHE_NAME = "gapura-shell-v2";
+const CACHE_NAME = "gapura-shell-v3";
 const PRECACHE = ["/login", "/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -74,20 +74,41 @@ self.addEventListener("fetch", (event) => {
 });
 
 self.addEventListener("push", (event) => {
-  let data = { title: "Aplikasi RT/RW", body: "Ada notifikasi baru", url: "/dashboard" };
+  let data = { title: "Aplikasi RT/RW", body: "Ada notifikasi baru", url: "/dashboard", kind: "normal", sound: false };
   try {
     if (event.data) data = { ...data, ...event.data.json() };
   } catch {
     if (event.data) data.body = event.data.text();
   }
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: "/icons/icon-192.png",
-      badge: "/icons/icon-192.png",
-      data: { url: data.url },
-    }),
-  );
+  const isSecurity = data.kind === "security";
+
+  const options = {
+    body: data.body,
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
+    data: { url: data.url },
+    renotify: isSecurity,
+    tag: isSecurity ? "security-call" : undefined,
+  };
+
+  if (isSecurity || data.sound) {
+    options.vibrate = [1000, 400, 1000, 400, 2000];
+    options.sound = "/sounds/alert.wav";
+    options.data = { ...options.data, security: true };
+  }
+
+  event.waitUntil(self.registration.showNotification(data.title, options));
+
+  // Jika app sedang terbuka, kirim event ke halaman agar bisa bunyikan alarm & tampilkan layar penuh
+  if (isSecurity) {
+    event.waitUntil(
+      self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+        for (const client of clients) {
+          client.postMessage({ type: "SECURITY_CALL", payload: data });
+        }
+      }),
+    );
+  }
 });
 
 self.addEventListener("notificationclick", (event) => {

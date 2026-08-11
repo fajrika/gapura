@@ -9,8 +9,11 @@ import {
   tagihan,
   transaksis,
   wargas,
+  rumahs,
+  settings,
 } from "@/db/schema";
 import { requireAuth, isPengurusRole } from "@/lib/auth";
+import { buildQrisPayload, isXenditConfigured } from "@/lib/payments";
 
 export type IuranActionState = {
   error?: string;
@@ -177,4 +180,38 @@ export async function deleteTransaksiAction(id: number) {
   await db.delete(transaksis).where(eq(transaksis.id, id));
   revalidatePath("/kas");
   revalidatePath("/dashboard");
+}
+
+// Ambil data pembayaran online (QRIS + VA unik per rumah) untuk satu tagihan
+export async function getQrisPayloadAction(tagihanId: number) {
+  const { dbUser } = await requireAuth();
+  const t = await db.query.tagihan.findFirst({ where: eq(tagihan.id, tagihanId) });
+  if (!t) throw new Error("Tagihan tidak ditemukan");
+  if (!isPengurusRole(dbUser.role) && t.wargaId !== dbUser.wargaId) {
+    throw new Error("Tidak punya akses");
+  }
+
+  const warga = await db.query.wargas.findFirst({ where: eq(wargas.id, t.wargaId) });
+  const rumah = warga?.rumahId
+    ? await db.query.rumahs.findFirst({ where: eq(rumahs.id, warga.rumahId) })
+    : null;
+
+  const settingRows = await db.select().from(settings);
+  const getSetting = (key: string) =>
+    settingRows.find((s) => s.key === key)?.value ?? "";
+
+  const qris = buildQrisPayload({
+    merchantName: getSetting("nama_rt") || "GAPURA RT",
+    city: getSetting("kota") || "RT",
+    amount: String(Math.round(Number(t.jumlah))),
+    reference: String(t.id),
+  });
+
+  return {
+    qris,
+    vaNumber: rumah?.vaNumber ?? null,
+    tagihanId: t.id,
+    jumlah: t.jumlah,
+    simulasi: !isXenditConfigured(),
+  };
 }

@@ -7,6 +7,7 @@ import { currentPeriode, formatPeriode, formatRupiah } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, Badge } from "@/components/ui/card";
 import { BayarButton, BatalBayarButton } from "@/components/bayar-button";
 import { GenerateTagihan, IuranForm, ToggleIuran } from "@/components/iuran-controls";
+import { BayarOnlineButton } from "@/components/pay-modal";
 import { Wallet } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -142,7 +143,7 @@ export default async function IuranPage({
                       </>
                     ) : (
                       <>
-                        <Badge variant="danger">Belum</Badge>
+                        <BayarOnlineButton tagihanId={t.id} jumlah={t.jumlah} />
                         {isManager && <BayarButton id={t.id} jumlah={t.jumlah} wargaId={t.wargaId} />}
                       </>
                     )}

@@ -14,6 +14,7 @@ import {
 import { getSession, isPengurusRole } from "@/lib/auth";
 import { currentPeriode, formatDate, formatPeriode, formatRupiah } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, Badge } from "@/components/ui/card";
+import { CallSecurityButton } from "@/components/call-security-button";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +85,9 @@ export default async function DashboardPage() {
         <p className="text-sm text-slate-500">
           {getSetting("nama_rt")} / {getSetting("nama_rw")}, {getSetting("kelurahan")}, {getSetting("kota")}
         </p>
+        <div className="mt-3">
+          <CallSecurityButton />
+        </div>
       </div>
 
       {statCards.length > 0 && (

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { wargas } from "@/db/schema";
+import { wargas, rumahs } from "@/db/schema";
 import { requireAuth, isPengurusRole } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, Badge } from "@/components/ui/card";
@@ -27,6 +27,10 @@ export default async function WargaDetailPage({
     where: eq(wargas.id, wargaId),
   });
   if (!warga) notFound();
+
+  const rumah = warga.rumahId
+    ? await db.query.rumahs.findFirst({ where: eq(rumahs.id, warga.rumahId) })
+    : null;
 
   const keluarga = warga.nkk
     ? await db
@@ -59,7 +63,18 @@ export default async function WargaDetailPage({
           <div>
             <h1 className="text-xl font-bold text-slate-900">{warga.nama}</h1>
             <p className="text-sm text-slate-500">
-              Rumah {warga.noRumah ?? "-"} · {warga.statusTinggal}
+              {rumah ? (
+                <Link
+                  href={`/rumah/${rumah.id}`}
+                  className="text-emerald-600 underline"
+                >
+                  Rumah {rumah.nomor}
+                  {rumah.blok ? ` · Blok ${rumah.blok}` : ""}
+                </Link>
+              ) : (
+                <>Rumah {warga.noRumah ?? "-"}</>
+              )}{" "}
+              · {warga.statusTinggal}
             </p>
           </div>
         </div>
