@@ -1,10 +1,10 @@
-# Aplikasi RT/RW — Next.js PWA
+# Gapura — Aplikasi RT/RW (Next.js PWA)
 
 Aplikasi manajemen RT/RW berbasis web (mobile-first PWA) untuk warga, pengurus, dan admin:
 data warga & KK, iuran & kas, pengumuman, agenda, pengajuan surat (PDF), jadwal ronda,
 laporan kejadian, keluhan, kegiatan (daftar hadir), arisan, dan notifikasi push.
 
-Repo: https://github.com/fajrika/rtrw
+Repo: https://github.com/fajrika/gapura
 
 ## Teknologi
 
@@ -31,7 +31,7 @@ npm run seed
 
 Setelah itu buka http://localhost:3003
 
-- DB PostgreSQL tersedia di `localhost:5433` (container `rtrw-db`), data tersimpan di volume `rtrw_pgdata`.
+- DB PostgreSQL tersedia di `localhost:5433` (container `gapura-db`), data tersimpan di volume `gapura_pgdata`.
 - Migrasi jalan otomatis sekali sebelum app start (service `migrate`), memakai `migrate.mjs` + folder `drizzle/`.
 - Restart/menjalankan ulang: `docker compose up -d`.
 - Log: `docker compose logs -f app`.
@@ -42,8 +42,8 @@ Setelah itu buka http://localhost:3003
 2. Salin `.env.example` ke `.env` dan isi.
 3. Jalankan PostgreSQL (contoh via Docker):
    ```bash
-   docker run -d --name rtrw-db -e POSTGRES_USER=rtrw -e POSTGRES_PASSWORD=rtrw_secret \
-     -e POSTGRES_DB=rtrw -p 5433:5432 -v rtrw-pgdata:/var/lib/postgresql postgres:18-alpine
+   docker run -d --name gapura-db -e POSTGRES_USER=gapura -e POSTGRES_PASSWORD=gapura_secret \
+     -e POSTGRES_DB=gapura -p 5433:5432 -v gapura-pgdata:/var/lib/postgresql postgres:18-alpine
    ```
 4. Generate & jalankan migrasi:
    ```bash
@@ -51,9 +51,9 @@ Setelah itu buka http://localhost:3003
    npm run db:migrate   # atau npm run db:push untuk dev
    ```
 5. Seed data contoh & akun: `npm run seed`
-   - Admin: `admin@rtrw.local` / `admin123`
-   - Pengurus: `pengurus@rtrw.local` / `pengurus123`
-   - Warga: `warga@rtrw.local` / `warga123`
+   - Admin: `admin@gapura.local` / `admin123`
+   - Pengurus: `pengurus@gapura.local` / `pengurus123`
+   - Warga: `warga@gapura.local` / `warga123`
 6. Jalankan dev: `npm run dev` (port 3000, atau 3003 bila 3000 terpakai)
 
 ## Notifikasi Push
@@ -87,14 +87,14 @@ Setelah itu buka http://localhost:3003
 
 - **Dockerfile** — 3 stage: `deps` (npm ci), `builder` (next build, output standalone), `runner` (node:22-alpine + `ttf-dejavu` untuk font PDF). Menyalin `migrate.mjs` + `drizzle/` + paket `drizzle-orm` & `postgres` (di-bundle Next, jadi disalin terpisah untuk migrasi).
 - **docker-compose.yml** — 3 service:
-  - `db`: `postgres:18-alpine`, port host 5433, healthcheck `pg_isready`, volume `rtrw_pgdata`
+  - `db`: `postgres:18-alpine`, port host 5433, healthcheck `pg_isready`, volume `gapura_pgdata`
   - `migrate`: jalankan `node migrate.mjs` sekali, menunggu `db` healthy; app menunggu migrate selesai
   - `app`: build dari Dockerfile, port host 3003 → container 3000
 - Variabel compose bisa di-override lewat `.env` di root repo (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `JWT_SECRET`, `VAPID_*`, `NEXT_PUBLIC_*`).
 
 ## Deploy ke Coolify / VPS
 
-1. Git push ke GitHub (repo `fajrika/rtrw`).
+1. Git push ke GitHub (repo `fajrika/gapura`).
 2. Di Coolify: buat resource **Docker Compose** (atau app Next.js dengan build pack Nixpacks) dari repo.
 3. Sediakan domain/subdomain HTTPS (wajib untuk push notification).
 4. Set env produksi di Coolify (sama seperti `.env.example`, `DATABASE_URL` menunjuk ke PostgreSQL produksi).

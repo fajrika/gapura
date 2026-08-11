@@ -10,7 +10,7 @@ function assertVapid() {
     throw new Error("VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY belum di-set");
   }
   webpush.setVapidDetails(
-    "mailto:admin@rtrw.local",
+    "mailto:admin@gapura.local",
     vapidPublicKey,
     vapidPrivateKey,
   );

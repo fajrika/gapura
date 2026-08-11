@@ -38,14 +38,14 @@ async function main() {
   await db.insert(users).values([
     {
       name: "Admin RT",
-      email: "admin@rtrw.local",
+      email: "admin@gapura.local",
       passwordHash: adminPassword,
       role: "admin",
       phone: "081234567890",
     },
     {
       name: "Pengurus RT",
-      email: "pengurus@rtrw.local",
+      email: "pengurus@gapura.local",
       passwordHash: pengurusPassword,
       role: "pengurus",
       phone: "081234567891",
@@ -136,7 +136,7 @@ async function main() {
   await db.insert(wargas).values(wargaData);
 
   const admin = (await db.query.users.findFirst({
-    where: (u, { eq }) => eq(u.email, "admin@rtrw.local"),
+    where: (u, { eq }) => eq(u.email, "admin@gapura.local"),
   }))!;
 
   const warga = (await db.query.wargas.findFirst({
@@ -145,7 +145,7 @@ async function main() {
 
   await db.insert(users).values({
     name: "Budi Santoso",
-    email: "warga@rtrw.local",
+    email: "warga@gapura.local",
     passwordHash: wargaPassword,
     role: "warga",
     phone: warga.telepon,
@@ -305,7 +305,7 @@ async function main() {
   ]);
 
   console.log("Seeding selesai.");
-  console.log("Login: admin@rtrw.local / admin123 | pengurus@rtrw.local / pengurus123 | warga@rtrw.local / warga123");
+  console.log("Login: admin@gapura.local / admin123 | pengurus@gapura.local / pengurus123 | warga@gapura.local / warga123");
 }
 
 main()

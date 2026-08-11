@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export const SESSION_COOKIE = "rtrw_session";
+export const SESSION_COOKIE = "gapura_session";
 export const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7;
 
 const secret = () => new TextEncoder().encode(process.env.JWT_SECRET!);

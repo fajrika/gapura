@@ -4,16 +4,16 @@ import { PwaInstaller } from "@/components/pwa/pwa-installer";
 
 export const metadata: Metadata = {
   title: {
-    default: "Aplikasi RT/RW",
-    template: "%s | RT/RW",
+    default: "Gapura — Aplikasi RT/RW",
+    template: "%s | Gapura",
   },
   description:
-    "Aplikasi manajemen RT/RW: data warga, iuran & kas, pengumuman, surat, ronda, kegiatan, dan arisan.",
+    "Gapura — aplikasi manajemen RT/RW: data warga, iuran & kas, pengumuman, surat, ronda, kegiatan, dan arisan.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "RT/RW",
+    title: "Gapura",
   },
 };
 

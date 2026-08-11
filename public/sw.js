@@ -1,4 +1,4 @@
-const CACHE_NAME = "rtrw-shell-v1";
+const CACHE_NAME = "gapura-shell-v1";
 const PRECACHE = ["/dashboard", "/login", "/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {

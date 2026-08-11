@@ -1,7 +1,7 @@
 {
-  "name": "Aplikasi RT/RW",
-  "short_name": "RT/RW",
-  "description": "Aplikasi manajemen RT/RW: data warga, iuran & kas, pengumuman, surat, ronda, kegiatan, dan arisan.",
+  "name": "Gapura — Aplikasi RT/RW",
+  "short_name": "Gapura",
+  "description": "Gapura — aplikasi manajemen RT/RW: data warga, iuran & kas, pengumuman, surat, ronda, kegiatan, dan arisan.",
   "id": "/",
   "start_url": "/dashboard",
   "scope": "/",
