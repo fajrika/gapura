@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Bell, RefreshCw } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -8,11 +8,25 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+const FORCE_UPDATE_SECONDS = 30;
+
 export function PwaInstaller() {
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [countdown, setCountdown] = useState(FORCE_UPDATE_SECONDS);
   const reloadingRef = useRef(false);
+
+  const applyUpdate = useCallback(() => {
+    reloadingRef.current = true;
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (reg?.waiting) {
+        reg.waiting.postMessage({ type: "SKIP_WAITING" });
+      } else {
+        window.location.reload();
+      }
+    });
+  }, []);
 
   useEffect(() => {
     let registration: ServiceWorkerRegistration | undefined;
@@ -52,6 +66,7 @@ export function PwaInstaller() {
             sw.addEventListener("statechange", () => {
               if (sw.state === "installed" && navigator.serviceWorker.controller) {
                 setUpdateAvailable(true);
+                setCountdown(FORCE_UPDATE_SECONDS);
               }
             });
           });
@@ -67,22 +82,28 @@ export function PwaInstaller() {
     };
   }, []);
 
-  const applyUpdate = () => {
-    reloadingRef.current = true;
-    navigator.serviceWorker.getRegistration().then((reg) => {
-      if (reg?.waiting) {
-        reg.waiting.postMessage({ type: "SKIP_WAITING" });
-      } else {
-        window.location.reload();
-      }
-    });
-  };
+  // Countdown tampilan + paksa update setelah 30 detik tanpa diklik
+  useEffect(() => {
+    if (!updateAvailable) return;
+    const interval = setInterval(() => {
+      setCountdown((c) => Math.max(0, c - 1));
+    }, 1000);
+    const timeout = setTimeout(applyUpdate, FORCE_UPDATE_SECONDS * 1000);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [updateAvailable, applyUpdate]);
 
   return (
     <>
       {updateAvailable && (
         <div className="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-3 bg-emerald-600 px-4 py-2.5 text-white">
-          <p className="text-sm font-medium">Versi baru tersedia.</p>
+          <p className="text-sm font-medium">
+            Versi baru tersedia{countdown > 0 && countdown < FORCE_UPDATE_SECONDS
+              ? ` — update otomatis dalam ${countdown} dtk`
+              : ""}
+          </p>
           <button
             onClick={applyUpdate}
             className="flex shrink-0 items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700"
