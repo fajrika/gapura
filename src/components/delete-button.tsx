@@ -29,3 +29,28 @@ export function DeleteWargaButton({
     </Button>
   );
 }
+
+export function DeleteTransaksiButton({
+  id,
+  action,
+}: {
+  id: number;
+  action: (id: number) => Promise<void>;
+}) {
+  const [pending, startTransition] = useTransition();
+
+  return (
+    <Button
+      size="small"
+      variant="ghost"
+      disabled={pending}
+      onClick={() => {
+        if (confirm("Hapus transaksi ini?")) {
+          startTransition(() => action(id));
+        }
+      }}
+    >
+      <Trash2 className="size-3.5" />
+    </Button>
+  );
+}
