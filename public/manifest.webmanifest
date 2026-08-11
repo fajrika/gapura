@@ -1,0 +1,34 @@
+{
+  "name": "Aplikasi RT/RW",
+  "short_name": "RT/RW",
+  "description": "Aplikasi manajemen RT/RW: data warga, iuran & kas, pengumuman, surat, ronda, kegiatan, dan arisan.",
+  "id": "/",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#059669",
+  "lang": "id",
+  "categories": ["utilities", "productivity", "social"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
