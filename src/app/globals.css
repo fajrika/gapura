@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
@@ -15,4 +17,125 @@ body {
   color: var(--foreground);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+}
+
+/*
+ * Dark mode: aplikasi ini memakai kelas warna slate/white yang hardcoded di
+ * banyak file, jadi di scope `.dark` kita remap kelas-kelas tersebut agar
+ * tampil konsisten. Semua remap diberi selector `.dark` sehingga spesifisitasnya
+ * menang atas kelas Tailwind aslinya.
+ */
+.dark {
+  --background: #0f172a;
+  --foreground: #e2e8f0;
+}
+
+.dark .bg-white {
+  background-color: #1e293b;
+}
+
+.dark .bg-slate-50 {
+  background-color: #1e293b;
+}
+
+.dark .bg-slate-100 {
+  background-color: #334155;
+}
+
+.dark .bg-slate-200 {
+  background-color: #475569;
+}
+
+.dark .bg-slate-400 {
+  background-color: #94a3b8;
+}
+
+.dark .bg-emerald-50 {
+  background-color: rgb(16 185 129 / 0.15);
+}
+
+.dark .bg-red-50 {
+  background-color: rgb(239 68 68 / 0.15);
+}
+
+.dark .bg-amber-50 {
+  background-color: rgb(245 158 11 / 0.15);
+}
+
+.dark .bg-blue-50 {
+  background-color: rgb(59 130 246 / 0.15);
+}
+
+.dark .text-slate-900 {
+  color: #f8fafc;
+}
+
+.dark .text-slate-800 {
+  color: #f1f5f9;
+}
+
+.dark .text-slate-700 {
+  color: #e2e8f0;
+}
+
+.dark .text-slate-600 {
+  color: #cbd5e1;
+}
+
+.dark .text-slate-500 {
+  color: #94a3b8;
+}
+
+.dark .text-slate-400 {
+  color: #64748b;
+}
+
+.dark .text-emerald-600,
+.dark .text-emerald-700 {
+  color: #34d399;
+}
+
+.dark .text-red-600,
+.dark .text-red-700 {
+  color: #f87171;
+}
+
+.dark .text-amber-700 {
+  color: #fbbf24;
+}
+
+.dark .text-blue-700 {
+  color: #60a5fa;
+}
+
+.dark .border-slate-100 {
+  border-color: #1e293b;
+}
+
+.dark .border-slate-200 {
+  border-color: #334155;
+}
+
+.dark .border-slate-300 {
+  border-color: #475569;
+}
+
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1e293b;
+}
+
+.dark .hover\:bg-slate-50:hover {
+  background-color: #1e293b;
+}
+
+.dark .hover\:bg-slate-100:hover {
+  background-color: #334155;
+}
+
+.dark .hover\:bg-slate-200:hover {
+  background-color: #475569;
+}
+
+.dark .placeholder\:text-slate-400::placeholder {
+  color: #64748b;
 }

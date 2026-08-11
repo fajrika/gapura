@@ -3,6 +3,7 @@ import { settings } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PushSubscribe } from "@/components/pwa/push-subscribe";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -14,8 +15,17 @@ export default async function PengaturanPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-bold text-slate-900">Pengaturan</h1>
-        <p className="text-sm text-slate-500">Info RT & preferensi notifikasi</p>
+        <p className="text-sm text-slate-500">Tampilan, info RT & preferensi notifikasi</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Tampilan</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ThemeToggle />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
