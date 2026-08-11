@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
+import { existsSync } from "node:fs";
 import { eq } from "drizzle-orm";
 import PDFDocument from "pdfkit";
 import { db } from "@/db";
 import { suratPengajuans, wargas, settings } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 
-const FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
-const FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
+const FONT_CANDIDATES = [
+  "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+  "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+  "/usr/share/fonts/TTF/DejaVuSans.ttf",
+];
+const FONT_BOLD_CANDIDATES = [
+  "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+  "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf",
+  "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",
+];
+const FONT = FONT_CANDIDATES.find(existsSync) ?? FONT_CANDIDATES[0];
+const FONT_BOLD = FONT_BOLD_CANDIDATES.find(existsSync) ?? FONT_BOLD_CANDIDATES[0];
 
 export async function GET(
   _request: Request,

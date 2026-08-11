@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: rtrw-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rtrw}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rtrw_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-rtrw}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rtrw} -d ${POSTGRES_DB:-rtrw}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    image: rtrw-app:latest
+    restart: "no"
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-rtrw}:${POSTGRES_PASSWORD:-rtrw_secret}@db:5432/${POSTGRES_DB:-rtrw}
+    command: ["node", "migrate.mjs"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3003}
+        NEXT_PUBLIC_VAPID_KEY: ${NEXT_PUBLIC_VAPID_KEY:-}
+    image: rtrw-app:latest
+    container_name: rtrw-app
+    restart: unless-stopped
+    ports:
+      - "3003:3000"
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-rtrw}:${POSTGRES_PASSWORD:-rtrw_secret}@db:5432/${POSTGRES_DB:-rtrw}
+      JWT_SECRET: ${JWT_SECRET:-ganti-dengan-secret-acak}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3003}
+      NEXT_PUBLIC_VAPID_KEY: ${NEXT_PUBLIC_VAPID_KEY:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:
