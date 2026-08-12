@@ -57,8 +57,16 @@ export function IuranForm() {
     <form
       action={(form) =>
         startTransition(async () => {
-          const res = await createIuranAction({}, form);
-          if (res?.error) setMsg(res);
+          try {
+            const res = await createIuranAction({}, form);
+            if (res?.error) setMsg(res);
+            else if (res?.success) {
+              setMsg(res);
+              setTimeout(() => setMsg({}), 3000);
+            }
+          } catch {
+            setMsg({ error: "Gagal menyimpan iuran" });
+          }
         })
       }
       className="flex flex-wrap items-end gap-2"
@@ -78,10 +86,11 @@ export function IuranForm() {
           <option value="jiwa">Jiwa</option>
         </select>
       </div>
-      <Button size="small" disabled={pending}>
-        <Plus className="size-4" /> Tambah
+      <Button type="submit" size="small" disabled={pending}>
+        <Plus className="size-4" /> {pending ? "Menyimpan..." : "Tambah"}
       </Button>
       {msg.error && <p className="text-sm text-red-600">{msg.error}</p>}
+      {msg.success && <p className="text-sm text-emerald-600">{msg.success}</p>}
     </form>
   );
 }

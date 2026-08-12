@@ -82,7 +82,7 @@ export function TambahAnggota({
           className="w-20"
         />
       </div>
-      <Button size="small" disabled={pending}>
+      <Button type="submit" size="small" disabled={pending}>
         <Plus className="size-3.5" /> Tambah
       </Button>
     </form>

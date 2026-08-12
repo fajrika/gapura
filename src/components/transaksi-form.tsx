@@ -68,7 +68,7 @@ export function TransaksiForm({ wargaList }: { wargaList: Warga[] }) {
         </div>
       )}
       <div className="sm:col-span-2 flex items-center gap-3">
-        <Button disabled={pending}>
+        <Button type="submit" disabled={pending}>
           <Plus className="size-4" /> {pending ? "Menyimpan..." : "Catat Transaksi"}
         </Button>
         {msg && <p className="text-sm text-emerald-700">{msg}</p>}
