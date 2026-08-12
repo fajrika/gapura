@@ -28,8 +28,16 @@ export function getGo2rtcClientUrl(host?: string): string {
 export async function syncGo2rtcStreams(): Promise<boolean> {
   const rows = await db.select().from(cameras).where(eq(cameras.enabled, true));
 
-  const desired: Record<string, string> = {};
-  for (const c of rows) desired[`camera-${c.id}`] = c.rtspUrl;
+  // Setiap kamera punya 2 sumber: transcode ffmpeg ke H.264 (diutamakan
+  // agar bisa diputar di semua browser) + RTSP asli (H.265). go2rtc
+  // memakai sumber pertama yang cocok dengan kemampuan perangkat.
+  const desired: Record<string, unknown> = {};
+  for (const c of rows) {
+    desired[`camera-${c.id}`] = [
+      `ffmpeg:camera-${c.id}#video=h264#veryfast`,
+      c.rtspUrl,
+    ];
+  }
 
   try {
     const res = await fetch(`${go2rtcServerUrl}/api/streams`, {
