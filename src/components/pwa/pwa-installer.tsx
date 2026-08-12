@@ -9,6 +9,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const FORCE_UPDATE_SECONDS = 30;
+const VERSION_KEY = "gapura-version";
 
 export function PwaInstaller() {
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
@@ -18,14 +19,23 @@ export function PwaInstaller() {
   const reloadingRef = useRef(false);
 
   const applyUpdate = useCallback(() => {
-    reloadingRef.current = true;
-    navigator.serviceWorker.getRegistration().then((reg) => {
-      if (reg?.waiting) {
-        reg.waiting.postMessage({ type: "SKIP_WAITING" });
-      } else {
-        window.location.reload();
-      }
-    });
+    // simpan versi build baru dulu agar banner tidak muncul lagi setelah reload
+    fetch("/api/version", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.buildId) localStorage.setItem(VERSION_KEY, d.buildId);
+      })
+      .catch(() => {})
+      .finally(() => {
+        reloadingRef.current = true;
+        navigator.serviceWorker.getRegistration().then((reg) => {
+          if (reg?.waiting) {
+            reg.waiting.postMessage({ type: "SKIP_WAITING" });
+          } else {
+            window.location.reload();
+          }
+        });
+      });
   }, []);
 
   useEffect(() => {
@@ -73,6 +83,22 @@ export function PwaInstaller() {
         })
         .catch(() => {});
     }
+
+    // Deteksi versi build: notif update walau service worker tidak berubah
+    fetch("/api/version", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        const stored = localStorage.getItem(VERSION_KEY);
+        if (!d.buildId || !stored) {
+          if (d.buildId) localStorage.setItem(VERSION_KEY, d.buildId);
+          return;
+        }
+        if (stored !== d.buildId) {
+          setUpdateAvailable(true);
+          setCountdown(FORCE_UPDATE_SECONDS);
+        }
+      })
+      .catch(() => {});
 
     return () => {
       window.removeEventListener("beforeinstallprompt", onPrompt);

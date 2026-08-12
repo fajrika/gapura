@@ -13,9 +13,13 @@ function authHeader(): Record<string, string> {
   };
 }
 
-// URL go2rtc yang bisa dipakai browser (embed kredensial di dalam URL)
+// URL go2rtc yang bisa dipakai browser (embed kredensial di dalam URL).
+// Pakai GO2RTC_PUBLIC_URL (URL yang bisa dijangkau publik, bukan IP tailnet).
 export function getGo2rtcClientUrl(host?: string): string {
-  const base = process.env.GO2RTC_URL ?? `http://${host ?? "localhost"}:1984`;
+  const base =
+    process.env.GO2RTC_PUBLIC_URL ??
+    process.env.GO2RTC_URL ??
+    `http://${host ?? "localhost"}:1984`;
   if (!go2rtcUser) return base;
   const url = new URL(base);
   url.username = go2rtcUser;

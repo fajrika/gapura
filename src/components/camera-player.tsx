@@ -14,7 +14,7 @@ export function CameraPlayer({
   const [ptzError, setPtzError] = useState("");
 
   const streamName = `camera-${camera.id}`;
-  const streamUrl = `${go2rtcUrl}/stream.html?src=${streamName}&mode=webrtc`;
+  const streamUrl = `${go2rtcUrl}/stream.html?src=${streamName}&mode=mse`;
 
   const ptz = async (move: string) => {
     setPtzError("");
