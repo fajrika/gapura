@@ -13,13 +13,14 @@ export function CameraPlayer({
 }) {
   const [ptzError, setPtzError] = useState("");
 
-  const streamUrl = `${go2rtcUrl}/stream.html?src=${encodeURIComponent(camera.rtspUrl)}&mode=webrtc`;
+  const streamName = `camera-${camera.id}`;
+  const streamUrl = `${go2rtcUrl}/stream.html?src=${streamName}&mode=webrtc`;
 
   const ptz = async (move: string) => {
     setPtzError("");
     try {
       const res = await fetch(
-        `${go2rtcUrl}/api/ptz?src=${encodeURIComponent(camera.rtspUrl)}&move=${move}`,
+        `${go2rtcUrl}/api/ptz?src=${streamName}&move=${move}`,
       );
       if (!res.ok) throw new Error("gagal");
     } catch {

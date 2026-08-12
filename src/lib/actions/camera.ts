@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { cameras } from "@/db/schema";
 import { requireAuth, isPengurusRole } from "@/lib/auth";
+import { syncGo2rtcStreams } from "@/lib/go2rtc";
 
 export type CameraActionState = {
   error?: string;
@@ -62,6 +63,7 @@ export async function createCameraAction(
     onvifPassword: parsed.data.onvifPassword || null,
   });
 
+  syncGo2rtcStreams().catch(() => {});
   revalidatePath("/cctv");
   return { error: undefined };
 }
@@ -69,11 +71,13 @@ export async function createCameraAction(
 export async function deleteCameraAction(id: number) {
   await assertManager();
   await db.delete(cameras).where(eq(cameras.id, id));
+  syncGo2rtcStreams().catch(() => {});
   revalidatePath("/cctv");
 }
 
 export async function toggleCameraAction(id: number, enabled: boolean) {
   await assertManager();
   await db.update(cameras).set({ enabled }).where(eq(cameras.id, id));
+  syncGo2rtcStreams().catch(() => {});
   revalidatePath("/cctv");
 }

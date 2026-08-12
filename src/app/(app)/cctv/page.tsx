@@ -3,6 +3,7 @@ import { desc } from "drizzle-orm";
 import { db } from "@/db";
 import { cameras } from "@/db/schema";
 import { requireAuth, isPengurusRole } from "@/lib/auth";
+import { getGo2rtcClientUrl, syncGo2rtcStreams } from "@/lib/go2rtc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CameraForm } from "@/components/camera-form";
 import { CameraPlayer } from "@/components/camera-player";
@@ -21,7 +22,10 @@ export default async function CctvPage() {
     .orderBy(desc(cameras.enabled), cameras.nama);
 
   const host = (await headers()).get("host")?.split(":")[0] ?? "localhost";
-  const go2rtcUrl = process.env.GO2RTC_URL ?? `http://${host}:1984`;
+  const go2rtcUrl = getGo2rtcClientUrl(host);
+
+  // Pastikan semua kamera aktif terdaftar sebagai stream di go2rtc
+  syncGo2rtcStreams().catch(() => {});
 
   return (
     <div className="space-y-4">
