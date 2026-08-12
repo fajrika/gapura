@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useActionState, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { FilePlus2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
@@ -8,13 +9,14 @@ import {
   createIuranAction,
   generateTagihanAction,
   toggleIuranAction,
-  type IuranActionState,
 } from "@/lib/actions/iuran";
 import { currentPeriode } from "@/lib/utils";
 
 export function GenerateTagihan() {
+  const router = useRouter();
   const [periode, setPeriode] = useState(currentPeriode());
   const [pending, startTransition] = useTransition();
+  const [msg, setMsg] = useState("");
 
   return (
     <div className="flex items-center gap-2">
@@ -26,23 +28,45 @@ export function GenerateTagihan() {
       />
       <Button
         disabled={pending}
-        onClick={() => startTransition(() => generateTagihanAction(periode))}
+        onClick={() =>
+          startTransition(async () => {
+            try {
+              await generateTagihanAction(periode);
+              router.refresh();
+              setMsg("Tagihan dibuat");
+              setTimeout(() => setMsg(""), 3000);
+            } catch {
+              setMsg("Gagal membuat tagihan");
+            }
+          })
+        }
       >
         <FilePlus2 className="size-4" />
         {pending ? "Membuat..." : "Generate"}
       </Button>
+      {msg && <p className="text-sm text-emerald-600">{msg}</p>}
     </div>
   );
 }
 
 export function ToggleIuran({ id, aktif }: { id: number; aktif: boolean }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   return (
     <Button
       size="small"
       variant={aktif ? "secondary" : "primary"}
       disabled={pending}
-      onClick={() => startTransition(() => toggleIuranAction(id, !aktif))}
+      onClick={() =>
+        startTransition(async () => {
+          try {
+            await toggleIuranAction(id, !aktif);
+            router.refresh();
+          } catch {
+            // abaikan
+          }
+        })
+      }
     >
       {aktif ? "Aktif" : "Nonaktif"}
     </Button>
@@ -50,27 +74,10 @@ export function ToggleIuran({ id, aktif }: { id: number; aktif: boolean }) {
 }
 
 export function IuranForm() {
-  const [pending, startTransition] = useTransition();
-  const [msg, setMsg] = useState<IuranActionState>({});
+  const [state, formAction] = useActionState(createIuranAction, {});
 
   return (
-    <form
-      action={(form) =>
-        startTransition(async () => {
-          try {
-            const res = await createIuranAction({}, form);
-            if (res?.error) setMsg(res);
-            else if (res?.success) {
-              setMsg(res);
-              setTimeout(() => setMsg({}), 3000);
-            }
-          } catch {
-            setMsg({ error: "Gagal menyimpan iuran" });
-          }
-        })
-      }
-      className="flex flex-wrap items-end gap-2"
-    >
+    <form action={formAction} className="flex flex-wrap items-end gap-2">
       <div>
         <Label htmlFor="namaIuran">Nama</Label>
         <Input id="namaIuran" name="nama" placeholder="cth: Iuran Keamanan" className="w-48" required />
@@ -86,11 +93,11 @@ export function IuranForm() {
           <option value="jiwa">Jiwa</option>
         </select>
       </div>
-      <Button type="submit" size="small" disabled={pending}>
-        <Plus className="size-4" /> {pending ? "Menyimpan..." : "Tambah"}
+      <Button type="submit" size="small">
+        <Plus className="size-4" /> Tambah
       </Button>
-      {msg.error && <p className="text-sm text-red-600">{msg.error}</p>}
-      {msg.success && <p className="text-sm text-emerald-600">{msg.success}</p>}
+      {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state.success && <p className="text-sm text-emerald-600">{state.success}</p>}
     </form>
   );
 }

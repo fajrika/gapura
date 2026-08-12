@@ -2,6 +2,7 @@
 
 import { useActionState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/input";
 import { FormErrors } from "@/components/form";
@@ -51,13 +52,22 @@ export function TambahAnggota({
   arisanId: number;
   wargaList: Warga[];
 }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   return (
     <form
       action={(form) => {
         const wargaId = Number(form.get("wargaId"));
         const urutan = Number(form.get("urutan") || 0);
-        if (wargaId) startTransition(() => tambahAnggotaArisanAction(arisanId, wargaId, urutan));
+        if (wargaId)
+          startTransition(async () => {
+            try {
+              await tambahAnggotaArisanAction(arisanId, wargaId, urutan);
+              router.refresh();
+            } catch {
+              // abaikan
+            }
+          });
       }}
       className="flex flex-wrap items-end gap-2"
     >
@@ -98,7 +108,17 @@ export function ArisanStatus({
   dibayar: boolean;
   dicairkan: boolean;
 }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const toggle = (field: "dibayar" | "dicairkan", value: boolean) =>
+    startTransition(async () => {
+      try {
+        await setArisanStatusAction(id, field, value);
+        router.refresh();
+      } catch {
+        // abaikan
+      }
+    });
   return (
     <div className="flex items-center gap-1">
       <Button
@@ -106,7 +126,7 @@ export function ArisanStatus({
         variant={dibayar ? "secondary" : "primary"}
         disabled={pending}
         title={dibayar ? "Tandai belum bayar" : "Tandai sudah bayar"}
-        onClick={() => startTransition(() => setArisanStatusAction(id, "dibayar", !dibayar))}
+        onClick={() => toggle("dibayar", !dibayar)}
       >
         {dibayar ? <X className="size-3.5" /> : <Check className="size-3.5" />}
         {dibayar ? "Bayar" : "Bayar"}
@@ -116,9 +136,7 @@ export function ArisanStatus({
         variant={dicairkan ? "secondary" : "primary"}
         disabled={pending}
         title={dicairkan ? "Batalkan pencairan" : "Tandai sudah cair"}
-        onClick={() =>
-          startTransition(() => setArisanStatusAction(id, "dicairkan", !dicairkan))
-        }
+        onClick={() => toggle("dicairkan", !dicairkan)}
       >
         {dicairkan ? "Cair" : "Cair"}
       </Button>

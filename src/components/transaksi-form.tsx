@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { createTransaksiAction } from "@/lib/actions/iuran";
 import type { Warga } from "@/db/schema";
 
 export function TransaksiForm({ wargaList }: { wargaList: Warga[] }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [msg, setMsg] = useState("");
   const [tipe, setTipe] = useState("masuk");
@@ -16,8 +18,17 @@ export function TransaksiForm({ wargaList }: { wargaList: Warga[] }) {
     <form
       action={(form) =>
         startTransition(async () => {
-          const res = await createTransaksiAction({}, form);
-          setMsg(res?.error ?? "Transaksi dicatat");
+          try {
+            const res = await createTransaksiAction({}, form);
+            if (res?.error) setMsg(res.error);
+            else {
+              setMsg("Transaksi dicatat");
+              router.refresh();
+              setTimeout(() => setMsg(""), 3000);
+            }
+          } catch {
+            setMsg("Gagal mencatat transaksi");
+          }
         })
       }
       className="grid gap-3 sm:grid-cols-2"
