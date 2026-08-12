@@ -127,15 +127,15 @@ export default async function IuranPage({
             {tagihanList.map((t) => {
               const w = wargaById.get(t.wargaId);
               return (
-                <div key={t.id} className="flex items-center justify-between gap-2 px-4 py-3">
-                  <div className="min-w-0">
+                <div key={t.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                  <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-slate-800">
                       {w?.nama ?? "Warga"}
                       {isManager && <span className="ml-1 text-xs text-slate-400">Rmh {w?.noRumah ?? "-"}</span>}
                     </p>
                     <p className="text-xs text-slate-400">{formatRupiah(t.jumlah)}</p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     {t.status === "lunas" ? (
                       <>
                         <Badge variant="success">Lunas</Badge>
